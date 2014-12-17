@@ -1,6 +1,6 @@
-﻿using System;
-using System.Windows;
-using PathTesterLogic;
+﻿using System.Windows;
+using Lab3_1.Infrastructure;
+using Ninject;
 
 namespace Lab3_1
 {
@@ -9,58 +9,17 @@ namespace Lab3_1
     /// </summary>
     public partial class MainWindow
     {
-        private readonly IFilePathManager _filePathManager;
-
         public MainWindow()
         {
-            _filePathManager = new FilePathManager();
-            InitializeComponent();
-        }
+            var kernel = new StandardKernel(new PathManagerModule());
+            var pathManagerView = kernel.Get<IPathManagerView>() as Window;
 
-        public IFilePathManager FilePathManager
-        {
-            get { return _filePathManager; }
-        }
-
-        private void btnAdd_Click(object sender, RoutedEventArgs e)
-        {
-            try
+            if (pathManagerView != null)
             {
-                FilePathManager.AddPath();
+                Application.Current.MainWindow = pathManagerView;
+                pathManagerView.Show();
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-         }
-
-        private void btnMoveTrue_Click(object sender, RoutedEventArgs e)
-        {
-            var path = FilePathManager.RemoveFromTrueList(lstTruePath.SelectedItem);
-            FilePathManager.MoveToFalse(path);
-        }
-
-        private void btnBackFalse_Click(object sender, RoutedEventArgs e)
-        {
-            var path = FilePathManager.RemoveFromTrueList(lstFalsePath.SelectedItem);
-            try
-            {
-                FilePathManager.MoveToCurrent(path);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-        }
-
-        private void btnRemoveFalse_Click(object sender, RoutedEventArgs e)
-        {
-            FilePathManager.RemoveFromFalseList(lstFalsePath.SelectedItem);
-        }
-
-        private void btnRemoveTrue_Click(object sender, RoutedEventArgs e)
-        {
-            FilePathManager.RemoveFromTrueList(lstTruePath.SelectedItem);
+            this.Close();
         }
     }
 }
